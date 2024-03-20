@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>LMSChatbot</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/style.css">
+</head>
+
+<body>
+  <div id="sub">
+    <img id="logo" src="/static/img/talk_img.png" alt="">
+    <h1>Chatbot.</h1>
+    <h3>에게 물어봐</h3>
+    <div id="sub_pp">
+        <p align="center" class="sub_p">시스템을 이용하는데<br>불편한 점이 있나요?</p>
+        <p align="center" class="sub_p">고객센터에 문의하기 전에<br>저한테 먼저 한 번 물어보세요.</p>        
+    </div>
+  </div>
+  
+  <div id="main">
+    <div id="response-container-title">
+      <p>Chatbot. <span>에게 물어봐</span></p>
+    </div>
+    <div class="chat-box">
+      <div id="default-message">
+        <img src="/static/img/AI_img.png" width="40px" height="40px">
+        <p class="bot-message">LMS 사용 시 에로사항을 질문해주세요.</p>
+      </div>
+      <!-- 채팅 메시지 입력 칸 -->
+    </div>
+    <div id="input-container">
+      <input rows="3" placeholder="메시지를 입력해주세요" id="message-input"></input>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.querySelector(".chat-box");
+    const messageInput = document.querySelector("#message-input");
+
+    function addMessage(message, isUserMessage) {
+      const imageDiv = document.createElement("div")
+      const messageDiv = document.createElement("div");
+      const user_sendDiv = document.createElement("div");
+
+      if (isUserMessage) {
+        imageDiv.classList.add("user-image");
+        messageDiv.classList.add("user-message");
+      } else {
+        imageDiv.classList.add("user-image");
+        messageDiv.classList.add("bot-message");
+      }
+
+      user_sendDiv.classList.add("user_sendDiv");
+      imageDiv.innerHTML = `<img src="/static/img/user_img.png" width="40px" height="40px" alt="">`;
+      messageDiv.innerHTML = `<p>${message}</p>`;
+
+      user_sendDiv.appendChild(messageDiv);
+      user_sendDiv.appendChild(imageDiv);
+
+      chatBox.appendChild(user_sendDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function sendMessage() {
+      const message = messageInput.value.trim();
+
+      if (message !== "") {
+        addMessage(message, true);
+        fetch("/api", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ message })
+        })
+          .then(response => response.json())
+          .then(data => {
+            messageInput.value = "";
+            const messageDiv = document.createElement("div");
+            const imageDiv = document.createElement("div");
+            const bot_sendDiv = document.createElement("div");
+
+            imageDiv.classList.add("user-image");
+            messageDiv.classList.add("bot-message");
+            bot_sendDiv.classList.add("bot_sendDiv");
+            const content = data.content;
+            
+            // Check if the content has code block
+            const hasCodeBlock = content.includes("```");
+              imageDiv.innerHTML = `<img src="/static/img/AI_img.png" width="40px" height="40px" alt="">`;
+              messageDiv.innerHTML = `<p>${content}</p>`
+              bot_sendDiv.appendChild(imageDiv);
+              bot_sendDiv.appendChild(messageDiv);
+              
+            chatBox.appendChild(bot_sendDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+          })
+          .catch(error => console.error(error));
+      }
+    }
+
+    messageInput.addEventListener("keydown", event => {
+      if (event.keyCode === 13 && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+  <script src="https://kit.fontawesome.com/7e9d496250.js" crossorigin="anonymous"></script>
+</body>
+
+</html>
