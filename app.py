@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO
 from langchain.chains import RetrievalQA
 from langchain_openai import ChatOpenAI
@@ -12,11 +12,10 @@ from langchain.schema import SystemMessage, AIMessage
 from langchain.prompts import PromptTemplate
 import tiktoken
 import os
-import uuid
 
 app = Flask(__name__)
 
-os.environ["OPENAI_API_KEY"] = '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'
+os.environ["OPENAI_API_KEY"] = 'YOUR_API_KEY'
 
 tokenizer = tiktoken.get_encoding("cl100k_base")
 
@@ -24,7 +23,7 @@ def tiktoken_len(text):
     tokens = tokenizer.encode(text)
     return len(tokens)
 
-loader = PyPDFLoader("datas/LMS 데이터.pdf")
+loader = PyPDFLoader("DATA_PATH")
 pages = loader.load_and_split()
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100, length_function=tiktoken_len)
